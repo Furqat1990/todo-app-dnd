@@ -1,25 +1,57 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from 'react';
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+
+import CreateTask from './components/createTask/CreateTask';
+import TodoList from './components/todoList/TodoList';
+import { toastMsg } from './utils';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+   const [tasks, setTasks] = useState([]);
+   const addTask = newTask => {
+      setTasks(prevTasks => {
+         const updatedTasks = [...prevTasks, newTask];
+         localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+         return updatedTasks;
+      });
+      toastMsg('success', 'Task added successfully');
+   }
 
-export default App;
+   const moveTask = id => {
+      setTasks(() => {
+         const filteredTasks = tasks.filter(task => task.id !== id)
+         localStorage.setItem('tasks', JSON.stringify(filteredTasks));
+         return filteredTasks
+      });
+      toastMsg('success', 'Task deleted successfully');
+   }
+
+   const updateTask = (id, status) => {
+      setTasks(prev => {
+         const updatedTasks = prev.map(task => {
+            if (task.id === id) {
+               return {...task, status }
+            }
+            return task;
+         });
+         localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+         toastMsg('success', `Task status is changed to "${status.toUpperCase()}"`);
+         return updatedTasks;
+      });
+   }
+
+   useEffect(() => {
+      setTasks(JSON.parse(localStorage.getItem('tasks')) || []);
+   }, []);
+
+   return (
+      <DndProvider backend={HTML5Backend}>
+         <div className='container'>
+            <CreateTask addTask={addTask}/>
+            <hr />
+            <TodoList tasks={tasks} moveTask={moveTask} updateTask={updateTask}/>
+         </div>
+      </DndProvider>
+   )
+}
+export default App
