@@ -16,8 +16,8 @@ function CreateTask({ addTask }) {
       } else if (name.length < 3) {
          toastMsg('error', 'Name must be at least 3 characters');
          return;
-      } else if (name.length > 40) {
-         toastMsg('error', 'Name must not exceed 40 characters');
+      } else if (name.length > 80) {
+         toastMsg('error', 'Name must not exceed 80 characters');
          return;
       } else {
          addTask({ id:uuid(), name, status:'todo' });
